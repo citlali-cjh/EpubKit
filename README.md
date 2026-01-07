@@ -1,92 +1,127 @@
-# EpubKit 使用指南
+# EpubKit
 
-## 项目介绍
+一个零依赖的 EPUB 文档处理工具，支持格式转换、智能排版和电子书生成。
 
-EpubKit 是一个**多功能**文档处理工具，专注于解决电子书和文档格式转换的痛点。它不仅是一个轻量级的 EPUB 转换器，还内置了**智能文本格式化引擎**，能够将混乱的纯文本（如只有一行的 TXT）自动重组为结构清晰的文档。
-
-**作者**: cjh
+作者：cjh
 
 ---
 
-## 核心功能
+## 功能特性
 
-### 1. EPUB 转换器 (EPUB Converter)
-无需安装庞大的软件，即可将 `.epub` 电子书转换为通用格式：
-- **Markdown**: 保留标题、粗体、列表等排版，适合导入笔记软件（Obsidian/Notion）。
-- **TXT**: 纯净文本，适合在任何设备上阅读。
+### 1. EPUB 转换器
+将 EPUB 电子书转换为通用文本格式：
+- Markdown：保留标题、列表等基本格式，便于后续编辑
+- TXT：纯文本格式，兼容所有阅读设备
 
-### 2. 智能格式化 (Smart Formatter)
-这是本项目最独特的功能。针对那种"全书只有一行"或者"排版混乱"的 TXT 文件，EpubKit 能自动识别：
-- 章节标题 (如 "第一章", "Chapter 1")
-- 序号列表 (如 "1.1", "(1)")
-- 段落结构
-并将它们自动重排为漂亮的 Markdown 文档。
+### 2. 智能文本格式化
+针对混乱或单行文本文件的自动排版工具：
+- 自动识别章节标题（如"第一章"、"Chapter 1"）
+- 检测并格式化列表项（如"1.1"、"(1)"）
+- 智能断句分段
+- 输出结构化 Markdown 文档
+
+### 3. EPUB 生成器
+将 Markdown 或 TXT 文件转换为标准 EPUB 电子书：
+- 支持自定义书名和作者信息
+- 自动转换 Markdown 语法为 HTML
+- 生成符合 EPUB 3.0 标准的文件
+- 适用于 AI 分析后的文档再生成
 
 ---
 
-## 使用说明
+## 使用方法
 
-### 下载与安装
-本项目完全基于 Python 原生库开发，**零依赖**，无需安装任何额外包。
-- 如果你是开发者：直接运行 `python EpubKit.py`
-- 如果你是普通用户：双击 `run.bat`
+### 快速启动
+Windows 用户：双击 `run.bat` 即可启动图形界面
+
+其他平台：运行 `python EpubKit.py`
 
 ### 界面操作
-1. **启动软件**: 双击 `run.bat`，看到现代化的操作界面。
-2. **转换电子书**:
-   - 点击 "EPUB Converter" 标签页。
-   - 选择你的 EPUB 文件。
-   - 点击 "Start Conversion"。
-3. **修复乱码/单行文本**:
-   - 点击 "Smart Formatter" 标签页。
-   - 选择那个很难读的 TXT 文件。
-   - 点击 "Format & Save"，软件会自动分析并生成一个新的 `.md` 文件。
+软件提供三个功能标签页：
+
+1. EPUB 转换：选择 EPUB 文件，勾选需要的输出格式，点击转换
+2. 智能格式化：选择混乱的 TXT 文件，一键生成格式化的 Markdown
+3. EPUB 生成：选择 MD/TXT 文件，输入书名和作者（可选），生成 EPUB
+
+### 语言切换
+界面右上角可切换中英文显示，默认为中文。
 
 ---
 
-# EpubKit - Documentation
+## 技术说明
 
-## Introduction
+- 开发语言：Python 3.6+
+- 界面框架：Tkinter（Python 标准库）
+- 依赖：无需安装任何第三方包
+- 跨平台：支持 Windows、macOS、Linux
 
-EpubKit is a versatile document processing tool designed to solve common ebook and document formatting issues. It acts as both a lightweight EPUB converter and an **Intelligent Text Formatter**, capable of restructuring messy plain text files (e.g., single-line TXTs) into well-organized documents.
+---
 
-**Author**: cjh
+## 许可协议
+
+MIT License
+
+---
+
+# EpubKit
+
+A zero-dependency EPUB document processing tool supporting format conversion, intelligent formatting, and ebook generation.
+
+Author: cjh
 
 ---
 
 ## Features
 
 ### 1. EPUB Converter
-Convert `.epub` ebooks into universal formats without heavy dependencies:
-- **Markdown**: Preserves headings, bold text, and lists. Perfect for note-taking apps.
-- **TXT**: Clean plain text for universal compatibility.
+Convert EPUB ebooks to universal text formats:
+- Markdown: Preserves headings and lists for further editing
+- TXT: Plain text compatible with all reading devices
 
-### 2. Smart Formatter
-The flagship feature of this project. For TXT files that are "one giant line" or poorly formatted, EpubKit automatically detects:
-- Chapter Headers (e.g., "Chapter 1")
-- Numbered Lists (e.g., "1.1")
-- Paragraph Breaks
-It then reconstructs the text into a clean, readable Markdown document.
+### 2. Smart Text Formatter
+Automatic formatting tool for messy or single-line text files:
+- Auto-detect chapter headers (e.g., "Chapter 1")
+- Detect and format list items (e.g., "1.1", "(1)")
+- Intelligent sentence and paragraph breaking
+- Output structured Markdown documents
+
+### 3. EPUB Creator
+Convert Markdown or TXT files to standard EPUB ebooks:
+- Customize title and author metadata
+- Auto-convert Markdown syntax to HTML
+- Generate EPUB 3.0 standard compliant files
+- Ideal for regenerating AI-analyzed documents
 
 ---
 
 ## Usage
 
-### Installation
-Built with pure Python standard libraries. **Zero Dependencies**.
-- **Developers**: Run `python EpubKit.py`
-- **Users**: Double-click `run.bat`
+### Quick Start
+Windows users: Double-click `run.bat` to launch the GUI
 
-### How to use
-1. **Launch**: Double-click `run.bat` to open the GUI.
-2. **Convert EPUB**:
-   - Go to "EPUB Converter" tab.
-   - Select your EPUB file.
-   - Click "Start Conversion".
-3. **Fix Messy Text**:
-   - Go to "Smart Formatter" tab.
-   - Select your messy TXT file.
-   - Click "Format & Save". The tool will analyze and save a formatted `.md` file.
+Other platforms: Run `python EpubKit.py`
+
+### Interface
+The software provides three functional tabs:
+
+1. EPUB Converter: Select EPUB file, choose output format, convert
+2. Smart Formatter: Select messy TXT file, generate formatted Markdown
+3. EPUB Creator: Select MD/TXT file, enter title/author (optional), create EPUB
+
+### Language Toggle
+Switch between Chinese and English using the button in the top-right corner. Default is Chinese.
 
 ---
+
+## Technical Details
+
+- Language: Python 3.6+
+- GUI Framework: Tkinter (Python standard library)
+- Dependencies: None
+- Cross-platform: Windows, macOS, Linux
+
+---
+
+## License
+
 MIT License

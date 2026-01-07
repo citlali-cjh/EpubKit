@@ -44,7 +44,18 @@ LANG = {
         'msg_reading': "正在读取: ",
         'msg_orig_len': "原始长度: {} 字符",
         'msg_format_success': "✅ 成功! 已保存至:\n{}",
-        'msg_error_prefix': "错误: "
+        'msg_error_prefix': "错误: ",
+        'tab_creator': " EPUB 生成 ",
+        'header_creator': "Markdown/TXT 转 EPUB",
+        'desc_creator': "为 AI 分析后的文档生成精美的 EPUB 电子书。",
+        'group_md_input': "选择 MD/TXT 文件",
+        'lbl_title': "书名:",
+        'lbl_author': "作者:",
+        'btn_start_create': "生成 EPUB",
+        'msg_creating': "正在生成 EPUB...",
+        'msg_epub_success': "✅ EPUB 生成成功!\n保存至: {}",
+        'placeholder_title': "输入书名(可选)",
+        'placeholder_author': "输入作者(可选)"
     },
     'EN': {
         'app_title': "EpubKit - Professional Tool",
@@ -73,7 +84,18 @@ LANG = {
         'msg_reading': "Reading: ",
         'msg_orig_len': "Original Length: {} chars",
         'msg_format_success': "✅ Success! Saved to:\n{}",
-        'msg_error_prefix': "Error: "
+        'msg_error_prefix': "Error: ",
+        'tab_creator': " EPUB Creator ",
+        'header_creator': "Markdown/TXT to EPUB",
+        'desc_creator': "Generate beautiful EPUB ebooks from your AI-analyzed documents.",
+        'group_md_input': "Select MD/TXT File",
+        'lbl_title': "Title:",
+        'lbl_author': "Author:",
+        'btn_start_create': "Create EPUB",
+        'msg_creating': "Creating EPUB...",
+        'msg_epub_success': "✅ EPUB generated successfully!\nSaved to: {}",
+        'placeholder_title': "Enter title (optional)",
+        'placeholder_author': "Enter author (optional)"
     }
 }
 
@@ -169,6 +191,125 @@ def epub_to_txt(epub_path, output_txt_path):
             return True
     except: return False
 
+def md_to_epub(input_path, output_epub_path, title="Untitled", author="Unknown"):
+    """Convert Markdown or TXT to EPUB"""
+    try:
+        import datetime
+        import uuid
+        
+        # Read input file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Try to detect if it's markdown
+        is_markdown = input_path.endswith('.md') or '#' in content or '**' in content
+        
+        # Convert MD to HTML if needed
+        if is_markdown:
+            # Simple MD to HTML conversion
+            html_content = content
+            # Headers
+            html_content = re.sub(r'^# (.+)$', r'<h1>\1</h1>', html_content, flags=re.MULTILINE)
+            html_content = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html_content, flags=re.MULTILINE)
+            html_content = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html_content, flags=re.MULTILINE)
+            html_content = re.sub(r'^#### (.+)$', r'<h4>\1</h4>', html_content, flags=re.MULTILINE)
+            # Bold and Italic
+            html_content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html_content)
+            html_content = re.sub(r'\*(.+?)\*', r'<em>\1</em>', html_content)
+            # Lists
+            html_content = re.sub(r'^- (.+)$', r'<li>\1</li>', html_content, flags=re.MULTILINE)
+            html_content = re.sub(r'(<li>.*?</li>\n)+', r'<ul>\g<0></ul>', html_content, flags=re.DOTALL)
+            # Paragraphs
+            html_content = re.sub(r'\n\n', '</p><p>', html_content)
+            html_content = '<p>' + html_content + '</p>'
+            html_content = html_content.replace('<p></p>', '')
+        else:
+            # Plain text to HTML
+            html_content = content.replace('\n', '<br/>\n')
+            html_content = f'<p>{html_content}</p>'
+        
+        # Create EPUB structure
+        uid = str(uuid.uuid4())
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        
+        # EPUB files content
+        mimetype_content = 'application/epub+zip'
+        
+        container_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container>'''
+        
+        content_opf = f'''<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>{title}</dc:title>
+    <dc:creator>{author}</dc:creator>
+    <dc:language>en</dc:language>
+    <dc:identifier id="uid">{uid}</dc:identifier>
+    <meta property="dcterms:modified">{timestamp}</meta>
+  </metadata>
+  <manifest>
+    <item id="content" href="content.xhtml" media-type="application/xhtml+xml"/>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+  </manifest>
+  <spine>
+    <itemref idref="content"/>
+  </spine>
+</package>'''
+        
+        content_xhtml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>{title}</title>
+  <style>
+    body {{ font-family: sans-serif; line-height: 1.6; margin: 2em; }}
+    h1 {{ color: #333; }}
+    h2 {{ color: #666; }}
+    p {{ margin: 1em 0; }}
+  </style>
+</head>
+<body>
+  <h1>{title}</h1>
+  <p><strong>Author:</strong> {author}</p>
+  <hr/>
+  {html_content}
+</body>
+</html>'''
+        
+        nav_xhtml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+  <title>Navigation</title>
+</head>
+<body>
+  <nav epub:type="toc">
+    <h1>Table of Contents</h1>
+    <ol>
+      <li><a href="content.xhtml">{title}</a></li>
+    </ol>
+  </nav>
+</body>
+</html>'''
+        
+        # Create EPUB zip
+        with zipfile.ZipFile(output_epub_path, 'w', zipfile.ZIP_DEFLATED) as epub:
+            # mimetype must be first and uncompressed
+            epub.writestr('mimetype', mimetype_content, compress_type=zipfile.ZIP_STORED)
+            epub.writestr('META-INF/container.xml', container_xml)
+            epub.writestr('OEBPS/content.opf', content_opf)
+            epub.writestr('OEBPS/content.xhtml', content_xhtml)
+            epub.writestr('OEBPS/nav.xhtml', nav_xhtml)
+        
+        return True
+    except Exception as e:
+        print(f"Error creating EPUB: {e}")
+        return False
+
 # --- GUI Application ---
 
 class EpubKitApp:
@@ -251,6 +392,47 @@ class EpubKitApp:
         self.log_fmt = scrolledtext.ScrolledText(self.tab2, height=10, state='disabled', font=("Consolas", 9))
         self.log_fmt.pack(fill=tk.BOTH, expand=True)
         
+        # Tab 3: EPUB Creator
+        self.tab3 = ttk.Frame(self.notebook, padding=15)
+        self.notebook.add(self.tab3, text="")  # Text set dynamically
+        
+        self.lbl_create_header = ttk.Label(self.tab3, text="", style="Header.TLabel")
+        self.lbl_create_header.pack(anchor=tk.W, pady=(0, 5))
+        self.lbl_create_desc = ttk.Label(self.tab3, text="", foreground="#666")
+        self.lbl_create_desc.pack(anchor=tk.W, pady=(0, 15))
+        
+        self.group_create_input = ttk.LabelFrame(self.tab3, text="", padding=10)
+        self.group_create_input.pack(fill=tk.X, pady=(0, 10))
+        
+        self.md_path = tk.StringVar()
+        ttk.Entry(self.group_create_input, textvariable=self.md_path).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        self.btn_create_browse = ttk.Button(self.group_create_input, text="", command=self.browse_md)
+        self.btn_create_browse.pack(side=tk.RIGHT)
+        
+        # Metadata inputs
+        meta_frame = ttk.Frame(self.tab3)
+        meta_frame.pack(fill=tk.X, pady=10)
+        
+        self.lbl_title_text = ttk.Label(meta_frame, text="")
+        self.lbl_title_text.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        self.title_var = tk.StringVar()
+        self.entry_title = ttk.Entry(meta_frame, textvariable=self.title_var, width=40)
+        self.entry_title.grid(row=0, column=1, sticky=tk.EW, padx=5, pady=5)
+        
+        self.lbl_author_text = ttk.Label(meta_frame, text="")
+        self.lbl_author_text.grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        self.author_var = tk.StringVar()
+        self.entry_author = ttk.Entry(meta_frame, textvariable=self.author_var, width=40)
+        self.entry_author.grid(row=1, column=1, sticky=tk.EW, padx=5, pady=5)
+        
+        meta_frame.columnconfigure(1, weight=1)
+        
+        self.btn_start_create = ttk.Button(self.tab3, text="", command=self.run_create_thread)
+        self.btn_start_create.pack(fill=tk.X, pady=15)
+        
+        self.log_create = scrolledtext.ScrolledText(self.tab3, height=8, state='disabled', font=("Consolas", 9))
+        self.log_create.pack(fill=tk.BOTH, expand=True)
+        
         # Footer
         self.lbl_footer = ttk.Label(self.root, text="", style="Footer.TLabel")
         self.lbl_footer.pack(pady=5)
@@ -266,6 +448,7 @@ class EpubKitApp:
         
         self.notebook.tab(self.tab1, text=L['tab_converter'])
         self.notebook.tab(self.tab2, text=L['tab_formatter'])
+        self.notebook.tab(self.tab3, text=L['tab_creator'])
         
         self.lbl_conv_header.config(text=L['header_converter'])
         self.group_conv_input.config(text=L['group_input'])
@@ -279,6 +462,14 @@ class EpubKitApp:
         self.group_fmt_input.config(text=L['group_raw'])
         self.btn_fmt_browse.config(text=L['btn_browse'])
         self.btn_start_fmt.config(text=L['btn_start_format'])
+        
+        self.lbl_create_header.config(text=L['header_creator'])
+        self.lbl_create_desc.config(text=L['desc_creator'])
+        self.group_create_input.config(text=L['group_md_input'])
+        self.btn_create_browse.config(text=L['btn_browse'])
+        self.lbl_title_text.config(text=L['lbl_title'])
+        self.lbl_author_text.config(text=L['lbl_author'])
+        self.btn_start_create.config(text=L['btn_start_create'])
         
         self.lbl_footer.config(text=L['footer'])
 
@@ -295,6 +486,10 @@ class EpubKitApp:
     def browse_raw(self):
         f = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
         if f: self.raw_path.set(f)
+
+    def browse_md(self):
+        f = filedialog.askopenfilename(filetypes=[("Markdown/Text", "*.md;*.txt"), ("All Files", "*.*")])
+        if f: self.md_path.set(f)
 
     def run_conversion_thread(self):
         threading.Thread(target=self.do_convert, daemon=True).start()
@@ -344,6 +539,33 @@ class EpubKitApp:
             self.log(self.log_fmt, L['msg_format_success'].format(os.path.basename(out_path)))
         except Exception as e:
             self.log(self.log_fmt, L['msg_error_prefix'] + str(e))
+
+    def run_create_thread(self):
+        threading.Thread(target=self.do_create, daemon=True).start()
+
+    def do_create(self):
+        L = LANG[self.current_lang]
+        path = self.md_path.get()
+        if not path or not os.path.exists(path):
+            messagebox.showerror("Error", L['msg_no_file'])
+            return
+
+        self.log(self.log_create, L['msg_creating'])
+        try:
+            # Get metadata
+            title = self.title_var.get().strip() or os.path.splitext(os.path.basename(path))[0]
+            author = self.author_var.get().strip() or "Unknown"
+            
+            # Generate output path
+            out_path = os.path.splitext(path)[0] + ".epub"
+            
+            # Create EPUB
+            if md_to_epub(path, out_path, title, author):
+                self.log(self.log_create, L['msg_epub_success'].format(os.path.basename(out_path)))
+            else:
+                self.log(self.log_create, L['msg_error_prefix'] + "Failed to create EPUB")
+        except Exception as e:
+            self.log(self.log_create, L['msg_error_prefix'] + str(e))
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
